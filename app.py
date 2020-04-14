@@ -13,6 +13,8 @@ import matplotlib.pyplot as plt
 COLOR = "black"
 BACKGROUND_COLOR = "#fff"
 
+# np.random.seed(24)
+
 
 def select_block_container_style():
     """Add selection section for setting setting the max-width and padding
@@ -105,45 +107,71 @@ else:
 def read_cases(file_value):
     cases = static_store[file_value].splitlines()
     cases = [case for case in cases if case]
-    return cases
+    orig_case_num = len(cases)
+    return cases, orig_case_num, []
 
 
 if file_buffer is not None:
-    cases = read_cases(file_buffer.getvalue())
-    orig_case_num = len(cases)
+    cases, orig_case_num, played_inds = read_cases(file_buffer.getvalue())
 else:
     cases = None
     st.info("Загрузите хотя бы один файл")
 
 reload_button = st.empty()
+selection_button = st.button("Выбрать кейс")
+wheel = st.empty()
 if reload_button.button("Перезагрузить файлы"):
     caching.clear_cache()
     static_store.clear()
+    played_inds = []
+    wheel.empty()
 
 if menu_state == "Скрыть":
     file_picker.empty()
     reload_button.empty()
 
-wheel = st.empty()
-if cases:
+
+def plot_wheel(played_inds=None, current_ind=None):
     size = 360 / orig_case_num
     sizes = [size] * orig_case_num
     labels = [i for i in range(1, orig_case_num + 1)]
-    colors = ["gray"] * orig_case_num
+    colors = ["lightgrey"] * orig_case_num
+    if current_ind is not None:
+        colors[current_ind] = "indianred"
+    if played_inds:
+        for ind in played_inds:
+            colors[ind] = "dimgray"
     fig1, ax1 = plt.subplots()
-    ax1.pie(sizes, labels=labels, rotatelabels=True, startangle=0, colors=colors)
+    wedges, texts = ax1.pie(sizes, labels=labels, rotatelabels=True, startangle=0, colors=colors, counterclock=False)
+    for w in wedges:
+        w.set_linewidth(2)
+        w.set_edgecolor("white")
     wheel.pyplot(fig1)
 
-if st.button("Выбрать кейс"):
+
+if cases:
+    plot_wheel(played_inds=played_inds)
+
+if selection_button:
     case_placeholder = st.empty()
-    if not cases:
+    if len(played_inds) == orig_case_num:
         case_placeholder.markdown("## Кейсы закончились!")
     else:
         case_num = len(cases)
-        for i in range(50):
-            ind = random.choice(range(case_num))
+        rand_choice = np.random.randint(orig_case_num * 3, orig_case_num * 5)
+        ind = 0
+        for i in range(rand_choice):
+            while ind in played_inds:
+                ind += 1
+                if ind >= orig_case_num:
+                    ind = 0
+            if ind >= orig_case_num:
+                ind = 0
+            plot_wheel(played_inds=played_inds, current_ind=ind)
             case_placeholder.markdown(display_case(cases[ind]))
-            if case_num > 1:
-                time.sleep(i * 0.001)
-        st.markdown(f"### Осталось кейсов: {case_num - 1}")
-        cases.pop(ind)
+            time.sleep(0.035 + i * 0.005)
+            ind += 1
+            if len(played_inds) == orig_case_num - 1:
+                break
+        played_inds.append(ind - 1)
+        st.markdown(f"### Осталось кейсов: {orig_case_num - len(played_inds)}")

@@ -5,7 +5,7 @@ ENV LANG=C.UTF-8
 
 RUN mkdir -p /root/.streamlit
 
-RUN pip install streamlit numpy markdown nltk
+RUN pip install streamlit numpy markdown nltk matplotlib
 
 RUN bash -c 'echo -e "\
 [general]\n\
