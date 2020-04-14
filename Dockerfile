@@ -20,5 +20,6 @@ enableCORS = false\n\
 EXPOSE 8501
 
 COPY app.py .
+COPY utils.py .
 
 CMD [ "streamlit", "run", "app.py" ]
