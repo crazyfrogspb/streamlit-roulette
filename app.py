@@ -82,6 +82,7 @@ if menu_state == "Скрыть":
 
 
 def plot_wheel(played_inds=None, current_ind=None):
+    plt.close()
     size = 360 / orig_case_num
     sizes = [size] * orig_case_num
     labels = [i for i in range(1, orig_case_num + 1)]
@@ -118,8 +119,7 @@ if selection_button:
             if ind >= orig_case_num:
                 ind = 0
             plot_wheel(played_inds=played_inds, current_ind=ind)
-            # case_placeholder.markdown(display_case(cases[ind]))
-            time.sleep(0.035 + i * 0.005)
+            time.sleep(i * 0.002)
             ind += 1
             if len(played_inds) == orig_case_num - 1:
                 break
