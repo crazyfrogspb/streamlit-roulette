@@ -8,6 +8,7 @@ import matplotlib.pyplot as plt
 import nltk
 import numpy as np
 import streamlit as st
+from PIL import Image
 from streamlit import caching
 
 from utils import fancy_cache, select_block_container_style, SessionState
@@ -78,7 +79,17 @@ def plot_wheel(played_inds=None, current_ind=None):
     labels = [i for i in range(1, state.orig_case_num + 1)]
     colors = get_colors(state.orig_case_num, current_ind)
     fig1, ax1 = plt.subplots(figsize=(3, 3))
+    ax1.axis("equal")
     wedges, texts = ax1.pie(sizes, labels=labels, rotatelabels=True, startangle=0, colors=colors, counterclock=False)
+    centre_circle = plt.Circle((0, 0), 0.5, color="white", fc="white", linewidth=1)
+    ax1.add_artist(centre_circle)
+    img = Image.open("podlodka3.png")
+    basewidth = 120
+    wpercent = basewidth / float(img.size[0])
+    hsize = int((float(img.size[1]) * float(wpercent)))
+    img = img.resize((basewidth, hsize), Image.ANTIALIAS)
+    width, height = img.size[0], img.size[1]
+    fig1.figimage(img, fig1.bbox.xmax - width // 2, fig1.bbox.ymax - height // 2)
     for w in wedges:
         w.set_linewidth(2)
         w.set_edgecolor("white")
