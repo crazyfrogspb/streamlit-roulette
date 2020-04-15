@@ -11,10 +11,11 @@ import numpy as np
 import streamlit as st
 from streamlit import caching
 
-from utils import select_block_container_style
+from utils import get_session_id, select_block_container_style
 
 
 # np.random.seed(24)
+user_session_id = get_session_id()
 
 
 def display_case(case):
@@ -26,7 +27,7 @@ def display_case(case):
 
 
 @st.cache(allow_output_mutation=True)
-def get_static_store() -> Dict:
+def get_static_store(user_session_id) -> Dict:
     """This dictionary is initialized once and can be used to store the files uploaded"""
     return {}
 
@@ -38,7 +39,7 @@ nltk.download("punkt")
 st.title("Рулетка кейсов")
 
 menu_state = st.radio("Показать меню", ["Показать", "Скрыть"], 0)
-static_store = get_static_store()
+static_store = get_static_store(user_session_id)
 
 file_picker = st.empty()
 file_buffer = file_picker.file_uploader("Загрузите файл с кейсами", type="txt")
@@ -52,7 +53,7 @@ else:
 
 
 @st.cache(allow_output_mutation=True)
-def read_cases(file_value):
+def read_cases(file_value, user_session_id):
     cases = static_store[file_value].splitlines()
     cases = [case for case in cases if case]
     orig_case_num = len(cases)
@@ -60,7 +61,7 @@ def read_cases(file_value):
 
 
 if file_buffer is not None:
-    cases, orig_case_num, played_inds = read_cases(file_buffer.getvalue())
+    cases, orig_case_num, played_inds = read_cases(file_buffer.getvalue(), user_session_id)
 else:
     cases = None
     played_inds = []
@@ -69,7 +70,8 @@ else:
 
 reload_button = st.empty()
 selection_button = st.button("Выбрать кейс")
-wheel = st.empty()
+wheel = st.pyplot(label=user_session_id)
+case_placeholder = st.empty()
 if reload_button.button("Перезагрузить файлы"):
     caching.clear_cache()
     static_store.clear()
@@ -98,21 +100,22 @@ def plot_wheel(played_inds=None, current_ind=None):
     sizes = [size] * orig_case_num
     labels = [i for i in range(1, orig_case_num + 1)]
     colors = get_colors(orig_case_num, current_ind)
-    fig1, ax1 = plt.subplots()
+    fig1, ax1 = plt.subplots(num=user_session_id)
     wedges, texts = ax1.pie(sizes, labels=labels, rotatelabels=True, startangle=0, colors=colors, counterclock=False)
     for w in wedges:
         w.set_linewidth(2)
         w.set_edgecolor("white")
-    wheel.pyplot(fig1, clear_figure=False)
+    wheel.pyplot(fig1)
 
     return wedges
 
 
 if cases:
     wedges = plot_wheel(played_inds=played_inds)
+    if played_inds:
+        case_placeholder.markdown(display_case(cases[played_inds[-1]]))
 
 if selection_button:
-    case_placeholder = st.empty()
     if len(played_inds) == orig_case_num:
         case_placeholder.markdown("## Кейсы закончились!")
     else:
@@ -126,12 +129,7 @@ if selection_button:
                     ind = 0
             if ind >= orig_case_num:
                 ind = 0
-            colors = get_colors(orig_case_num, ind)
-            for i, w in enumerate(wedges):
-                w.set_color(colors[i])
-                w.set_linewidth(2)
-                w.set_edgecolor("white")
-            wheel.pyplot(clear_figure=False)
+            plot_wheel(orig_case_num, ind)
             time.sleep(i * 0.002)
             ind += 1
             if len(played_inds) == orig_case_num - 1:
