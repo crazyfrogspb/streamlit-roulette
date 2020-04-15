@@ -95,7 +95,6 @@ def get_colors(orig_case_num, current_ind):
 
 
 def plot_wheel(played_inds=None, current_ind=None):
-    plt.close()
     size = 360 / orig_case_num
     sizes = [size] * orig_case_num
     labels = [i for i in range(1, orig_case_num + 1)]
@@ -106,6 +105,7 @@ def plot_wheel(played_inds=None, current_ind=None):
         w.set_linewidth(2)
         w.set_edgecolor("white")
     wheel.pyplot(fig1)
+    plt.close(fig1)
 
     return wedges
 
