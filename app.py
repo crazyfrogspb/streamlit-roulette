@@ -5,6 +5,9 @@ import random
 import time
 from typing import Dict
 
+import matplotlib
+
+matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import nltk
 import numpy as np
@@ -99,12 +102,18 @@ def plot_wheel(played_inds=None, current_ind=None):
     sizes = [size] * orig_case_num
     labels = [i for i in range(1, orig_case_num + 1)]
     colors = get_colors(orig_case_num, current_ind)
-    fig1, ax1 = plt.subplots(num=user_session_id)
+    fig1, ax1 = plt.subplots()
     wedges, texts = ax1.pie(sizes, labels=labels, rotatelabels=True, startangle=0, colors=colors, counterclock=False)
     for w in wedges:
         w.set_linewidth(2)
         w.set_edgecolor("white")
-    wheel.pyplot(fig1)
+    while True:
+        try:
+            wheel.pyplot(fig1)
+            break
+        except IndexError:
+            pass
+
     plt.close(fig1)
 
     return wedges
