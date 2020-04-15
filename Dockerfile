@@ -19,6 +19,7 @@ enableCORS = false\n\
 
 EXPOSE 8501
 
+COPY podlodka3.png .
 COPY app.py .
 COPY utils.py .
 
