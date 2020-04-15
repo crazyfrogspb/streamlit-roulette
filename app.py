@@ -81,27 +81,35 @@ if menu_state == "Скрыть":
     reload_button.empty()
 
 
-def plot_wheel(played_inds=None, current_ind=None):
-    plt.close()
-    size = 360 / orig_case_num
-    sizes = [size] * orig_case_num
-    labels = [i for i in range(1, orig_case_num + 1)]
+def get_colors(orig_case_num, current_ind):
     colors = ["lightgrey"] * orig_case_num
     if current_ind is not None:
         colors[current_ind] = "indianred"
     if played_inds:
         for ind in played_inds:
             colors[ind] = "dimgray"
+
+    return colors
+
+
+def plot_wheel(played_inds=None, current_ind=None):
+    plt.close()
+    size = 360 / orig_case_num
+    sizes = [size] * orig_case_num
+    labels = [i for i in range(1, orig_case_num + 1)]
+    colors = get_colors(orig_case_num, current_ind)
     fig1, ax1 = plt.subplots()
     wedges, texts = ax1.pie(sizes, labels=labels, rotatelabels=True, startangle=0, colors=colors, counterclock=False)
     for w in wedges:
         w.set_linewidth(2)
         w.set_edgecolor("white")
-    wheel.pyplot(fig1)
+    wheel.pyplot(fig1, clear_figure=False)
+
+    return wedges
 
 
 if cases:
-    plot_wheel(played_inds=played_inds)
+    wedges = plot_wheel(played_inds=played_inds)
 
 if selection_button:
     case_placeholder = st.empty()
@@ -118,7 +126,12 @@ if selection_button:
                     ind = 0
             if ind >= orig_case_num:
                 ind = 0
-            plot_wheel(played_inds=played_inds, current_ind=ind)
+            colors = get_colors(orig_case_num, ind)
+            for i, w in enumerate(wedges):
+                w.set_color(colors[i])
+                w.set_linewidth(2)
+                w.set_edgecolor("white")
+            wheel.pyplot(clear_figure=False)
             time.sleep(i * 0.002)
             ind += 1
             if len(played_inds) == orig_case_num - 1:
