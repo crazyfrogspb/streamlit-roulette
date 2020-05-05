@@ -16,7 +16,7 @@ def select_block_container_style():
     st.sidebar.header("Block Container Style")
     max_width_100_percent = st.sidebar.checkbox("Max-width: 100%?", False)
     if not max_width_100_percent:
-        max_width = st.sidebar.slider("Select max-width in px", 100, 2000, 1200, 100)
+        max_width = st.sidebar.slider("Select max-width in px", 100, 2000, 800, 100)
     else:
         max_width = 1200
     padding_top = st.sidebar.number_input("Select padding top in rem", 0, 200, 5, 1)
